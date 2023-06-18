@@ -16,19 +16,18 @@ const Reviews = () => {
   const { movieId } = useParams();
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
+      setIsLoading(true);
+
       try {
-        setError(false);
-        setIsLoading(true);
         const { results } = await fetchMovieReviews(movieId);
         setReviews(results);
+        setIsLoading(false);
       } catch (error) {
-        console.log(error);
-        setError(true);
-      } finally {
+        setError(error);
         setIsLoading(false);
       }
     };
@@ -43,10 +42,10 @@ const Reviews = () => {
       {isLoading ? (
         <LoadingIndicator />
       ) : error ? (
-        <p>Sorry, we could not fetch the movie reviews. Please try again later.</p>
-      ) : reviews.length ? (
+        <div>Error: {error.message}</div>
+      ) : reviews.length > 0 ? (
         <ReviewList className="reviews-container">
-          {reviews.map((review) => (
+          {reviews.map(review => (
             <ReviewListItem className="review-card" key={review.id}>
               <Author>Author: {review.author}</Author>
               <Review>{review.content}</Review>
@@ -54,7 +53,9 @@ const Reviews = () => {
           ))}
         </ReviewList>
       ) : (
-        <NoReviewsText>We don't have any reviews for this movie yet.</NoReviewsText>
+        <NoReviewsText>
+          We don't have any reviews for this movie yet.
+        </NoReviewsText>
       )}
     </Wrapper>
   );

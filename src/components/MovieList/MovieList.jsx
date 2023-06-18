@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   StyledSection,
@@ -6,29 +8,27 @@ import {
   List,
   ListItem,
 } from './MovieList.styled';
-
-const MovieList = ({ trendingMovies }) => {
+const MovieList = ({ movies }) => {
+const location = useLocation()
   return (
     <StyledSection>
       <SectionTitle>Trending today</SectionTitle>
 
       <List>
-        {trendingMovies.map(trendingMovie => (
-          <ListItem key={trendingMovie.id}>
-            <StyledLink to={`/movies/${trendingMovie.id}`}>
-              {trendingMovie.title}
+        {movies.map(movie => (
+          <ListItem key={movie.id}>
+            <StyledLink to={`/movies/${movie.id}`} state={{from:  location}}>
+              {movie.title}
             </StyledLink>
           </ListItem>
         ))}
       </List>
     </StyledSection>
   );
-};
-
-export default MovieList;
+}
 
 MovieList.propTypes = {
-  trendingMovies: PropTypes.arrayOf(
+  movies: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
       title: PropTypes.string.isRequired,
@@ -39,3 +39,6 @@ MovieList.propTypes = {
     })
   ).isRequired,
 };
+
+export default MovieList;
+

@@ -2,6 +2,7 @@ import { LoadingDots, Dot } from './SharedLayout.styled';
 
 export const LoadingIndicator = () => {
   return (
+
     <LoadingDots>
       <Dot delay="0s" />
       <Dot delay=".2s" />
@@ -9,3 +10,4 @@ export const LoadingIndicator = () => {
     </LoadingDots>
   );
 };
+

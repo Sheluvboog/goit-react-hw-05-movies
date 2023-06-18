@@ -7,13 +7,14 @@ const SearchMovies = ({ onSubmit }) => {
     e.preventDefault();
 
     const query = e.target.elements.query.value;
+
     if (!query) {
       toast.error('Please enter something');
       return;
     }
 
-    onSubmit(query);
-    e.target.reset();
+    onSubmit(query); 
+    e.target.reset(); 
   };
 
   return (
@@ -27,3 +28,4 @@ const SearchMovies = ({ onSubmit }) => {
 SearchMovies.propTypes = { onSubmit: PropTypes.func.isRequired };
 
 export default SearchMovies;
+

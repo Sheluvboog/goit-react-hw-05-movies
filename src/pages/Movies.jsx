@@ -1,29 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { fetchMovieByName } from '../services/api';
 import SearchMovies from '../components/SearchMovies/SearchMovies';
 import {
-  List,
-  ListItem,
   SectionTitle,
-  StyledLink,
   StyledSection,
 } from '../components/MovieList/MovieList.styled';
 import { LoadingIndicator } from 'components/SharedLayout/LoadingDots';
+import MovieList from '../components/MovieList/MovieList';
 
 const Movies = () => {
-  const [movies, setMovies] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
+  // const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error] = useState(null);
 
   useEffect(() => {
     const query = searchParams.get('query') ?? '';
     if (!query) return;
 
-    const getMovie = async () => {
+    const getMovies = async () => {
       try {
         setIsLoading(true);
         const { results } = await fetchMovieByName(query);
@@ -31,20 +29,18 @@ const Movies = () => {
         if (results.length === 0) {
           toast.dismiss();
           toast.error('No movies found');
-          setMovies([]);
-        } else {
-          setMovies(results);
         }
+
+        setSearchResults(results);
       } catch (error) {
         toast.error(error.message);
-        setMovies([]);
-        setError(true);
+        setSearchResults([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    getMovie();
+    getMovies();
   }, [searchParams]);
 
   const handleSubmit = query => {
@@ -59,18 +55,10 @@ const Movies = () => {
         <SearchMovies onSubmit={handleSubmit} />
 
         {isLoading && <LoadingIndicator />}
-        {error && <p>Sorry, we could not fetch the movies. Please try again later.</p>}
-        {movies.length > 0 && (
-          <List>
-            {movies.map(movie => (
-              <ListItem key={movie.id}>
-                <StyledLink to={`/movies/${movie.id}`} state={{ from: location }}>
-                  {movie.title}
-                </StyledLink>
-              </ListItem>
-            ))}
-          </List>
+        {error && (
+          <p>Sorry, we could not fetch the trending movies. Please try again later.</p>
         )}
+        {searchResults.length !== 0 && <MovieList movies={searchResults} />}
       </StyledSection>
     </main>
   );
