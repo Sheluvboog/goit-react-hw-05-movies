@@ -10,11 +10,14 @@ import {
   StyledLink,
   StyledSection,
 } from '../components/MovieList/MovieList.styled';
+import { LoadingIndicator } from 'components/SharedLayout/LoadingDots';
 
 const Movies = () => {
   const [movies, setMovies] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const query = searchParams.get('query') ?? '';
@@ -22,6 +25,7 @@ const Movies = () => {
 
     const getMovie = async () => {
       try {
+        setIsLoading(true);
         const { results } = await fetchMovieByName(query);
 
         if (results.length === 0) {
@@ -34,9 +38,13 @@ const Movies = () => {
       } catch (error) {
         toast.error(error.message);
         setMovies([]);
+        setError(true);
+      } finally {
+        setIsLoading(false);
       }
     };
-      getMovie();
+
+    getMovie();
   }, [searchParams]);
 
   const handleSubmit = query => {
@@ -50,19 +58,22 @@ const Movies = () => {
 
         <SearchMovies onSubmit={handleSubmit} />
 
-        <List>
-          {movies.map(movie => (
-            <ListItem key={movie.id}>
-              <StyledLink to={`/movies/${movie.id}`} state={{ from: location }}>
-                {movie.title}
-              </StyledLink>
-            </ListItem>
-          ))}
-        </List>
+        {isLoading && <LoadingIndicator />}
+        {error && <p>Sorry, we could not fetch the movies. Please try again later.</p>}
+        {movies.length > 0 && (
+          <List>
+            {movies.map(movie => (
+              <ListItem key={movie.id}>
+                <StyledLink to={`/movies/${movie.id}`} state={{ from: location }}>
+                  {movie.title}
+                </StyledLink>
+              </ListItem>
+            ))}
+          </List>
+        )}
       </StyledSection>
     </main>
   );
 };
 
 export default Movies;
-

@@ -1,51 +1,39 @@
-import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
-import { useParams, Outlet, useLocation, Link } from 'react-router-dom';
-import { BsArrowLeftShort } from 'react-icons/bs';
-import { fetchMovieById } from '../services/api'; 
-import MovieCard from '../components/MovieCard/MovieCard';
-import { Button, Container } from './MovieDelails.styled';
+import { fetchTrendMovies } from '../services/api';
+import MovieList from 'components/MovieList/MovieList';
 import { LoadingIndicator } from 'components/SharedLayout/LoadingDots';
 
-const MovieDelails = () => {
-  const { movieId } = useParams();
-  const location = useLocation();
-  const [selectedMovie, setSelectedMovie] = useState({});
+const Home = () => {
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchSelectedMovie = async movieId => {
+    const fetchTrendingMovies = async () => {
       try {
-        const movieData = await fetchMovieById(movieId);
-        setSelectedMovie(movieData);
+        setError(false);
+        setIsLoading(true);
+        const { results } = await fetchTrendMovies();
+        setTrendingMovies(results);
       } catch (error) {
-        console.log(error);
+        setError(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchSelectedMovie(movieId);
-  }, [movieId]);
+    fetchTrendingMovies();
+  }, []);
 
   return (
-    <main>
-      <Container>
-
-        <Link to={location?.state?.from ?? '/'}>
-          <Button type="button">
-            <BsArrowLeftShort
-              style={{ width: '25px', height: '25px', display: 'inline-block' }}
-            />
-            Go back
-          </Button>
-        </Link>
-
-        <MovieCard movie={selectedMovie} /> 
-
-        <Suspense fallback={<LoadingIndicator />}>
-          <Outlet />
-        </Suspense>
-      </Container>
-    </main>
+    <>
+      {isLoading && <LoadingIndicator />}
+      {error && (
+        <p>Sorry, we could not fetch the trending movies. Please try again later.</p>
+      )}
+      {trendingMovies.length > 0 && <MovieList trendingMovies={trendingMovies} />}
+    </>
   );
 };
 
-export default MovieDelails;
+export default Home;
